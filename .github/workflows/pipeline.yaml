@@ -1,0 +1,19 @@
+---
+name: Pipeline
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linter:
+    uses: ./.github/workflows/00_linter.yaml
+
+  test:
+    uses: ./.github/workflows/01_test.yaml

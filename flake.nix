@@ -1,0 +1,42 @@
+{
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs.flake-compat = {
+    url = "github:NixOS/flake-compat";
+    flake = false;
+  };
+
+  outputs = { self, nixpkgs, ... }:
+    {
+      packages = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          nix-optdiff = pkgs.callPackage ./package.nix {
+            optdiffNix = self.outPath;
+            optdiffNixAttr = "default";
+            # set optdiffFlake and optdiffFlakeAttr if they're different from above
+          };
+        in
+        {
+          inherit nix-optdiff;
+          default = nix-optdiff;
+        });
+
+      nixosConfigurations =
+        let
+          baseModule = { modulesPath, ... }: {
+            imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ];
+            nixpkgs.pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          };
+        in
+        {
+          base = nixpkgs.lib.nixosSystem { modules = [ baseModule ]; };
+          hello = nixpkgs.lib.nixosSystem {
+            modules = [
+              baseModule
+              ({ pkgs, ... }: { environment.systemPackages = [ pkgs.hello ]; })
+            ];
+          };
+        };
+
+    };
+}

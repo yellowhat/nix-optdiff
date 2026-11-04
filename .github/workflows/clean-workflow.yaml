@@ -1,0 +1,40 @@
+---
+name: Clean - Workflow
+
+on:  # yamllint disable-line rule:truthy
+  schedule:
+    - cron: "0 6 * * 1" # UTC
+  workflow_dispatch:
+
+jobs:
+  clean-workflow:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to read repository data
+      actions: write # Required to modify workflows
+    steps:
+      - name: Delete skipped
+        uses: Mattraks/delete-workflow-runs@b3018382ca039b53d238908238bd35d1fb14f8ee # v2.1.0
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 0
+          delete_run_by_conclusion_pattern: skipped
+
+      - name: Delete cancelled
+        uses: Mattraks/delete-workflow-runs@b3018382ca039b53d238908238bd35d1fb14f8ee # v2.1.0
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 0
+          delete_run_by_conclusion_pattern: cancelled
+
+      - name: Delete workflow runs (older than a week)
+        uses: Mattraks/delete-workflow-runs@b3018382ca039b53d238908238bd35d1fb14f8ee # v2.1.0
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 7
+          keep_minimum_runs: 1
