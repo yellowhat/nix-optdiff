@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # renovate: datasource=docker depName=nixos/nix
-NIX_VER=2.35.5
+NIX_VER=2.35.6
 
 args=(
     --name nix-optdiff
